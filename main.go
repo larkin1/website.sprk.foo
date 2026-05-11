@@ -3,17 +3,38 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
-func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `<!DOCTYPE html>
-<html>
-  <head><title>Sprk</title></head>
-  <body><h1>Hi...</h1>
-	but also what are you doing here? There is literally nothing lol</body>
-</html>`)
-	})
+func home(w http.ResponseWriter, r *http.Request) {
+	file, err := os.ReadFile("html/index.html")
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	fmt.Fprint(w, string(file))
+}
 
-	http.ListenAndServe(":8080", nil)
+func second(w http.ResponseWriter, r *http.Request) {
+	file, err := os.ReadFile("html/second.html")
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+	fmt.Fprint(w, string(file))
+}
+
+func widget(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, `<div class="card">Hello</div>`)
+}
+
+func main() {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", home)
+	mux.HandleFunc("/second", second)
+	mux.HandleFunc("/widget", widget)
+
+	http.ListenAndServe(":8080", mux)
 }
